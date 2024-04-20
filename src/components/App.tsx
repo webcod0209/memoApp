@@ -1,22 +1,42 @@
+import { ChangeEvent, useState, FC, useCallback } from "react";
+import styled from "styled-components";
+import { MemoList } from "./MemoList";
+import { useMemoList } from "./hooks/useMemoList";
 
+export const App: FC = () => {
+  // カスタムフックからそれぞれ取得
+  const { memos, addTodo, deleteTodo } = useMemoList();
 
-export const App = () => {
+  // テキストボックスState
+  const [text, setText] = useState<string>("");
+
+  // テキストボックス入力時に入力内容をStateに設定
+  const onChangeText = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
+
+  // 追加ボタン押下時
+  const onClickAdd = () => {
+    addTodo(text);
+    // テキストボックスを空に
+    setText("");
+  }
+
+  // 削除ボタン押下時(何番目が押されたかを引数で受け取る)
+  const onClickDelete = useCallback((index: number) => {
+    deleteTodo(index);
+  }, [deleteTodo]); 
+
   return (
     <>
       <h1>簡単メモアプリ</h1>
       <div>
-        <input type="text" />
-        <button>追加</button>
+        <input type="text" value={text} onChange={onChangeText} />
+        <SButton onClick={onClickAdd}>追加</SButton>
       </div>
-      <div>
-        <h2>メモ一覧</h2>
-        <ul>
-          <li>
-            <span>本を読む</span>
-            <button>削除</button>
-          </li>
-        </ul>
-      </div>
+      <MemoList memos={memos} onClickDelete={onClickDelete} />
     </>
   );
 };
+
+const SButton = styled.button`
+  margin-left: 16px;
+`;
